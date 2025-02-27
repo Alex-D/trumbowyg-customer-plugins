@@ -1,0 +1,17 @@
+{
+  "name": "trumbowyg-doonet-plugins",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint:editorconfig": "editorconfig-checker"
+  },
+  "devDependencies": {
+    "vite": "^6.2.0",
+    "editorconfig-checker": "^6.0.1"
+  },
+  "volta": {
+    "node": "22.14.0"
+  }
+}

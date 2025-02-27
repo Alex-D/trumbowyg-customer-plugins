@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Trumbowyg by Alex-D</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7fa;
+            font-family: "Trebuchet MS", Verdana, Arial, Helvetica, sans-serif;
+        }
+
+        header {
+            text-align: center;
+        }
+
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            font-size: 26px;
+            margin-top: 0;
+        }
+
+        h1 + pre,
+        h2 + pre,
+        h3 + pre,
+        h4 + pre {
+            margin-top: -20px;
+        }
+
+        p {
+            margin-top: 0;
+        }
+    </style>
+    <link rel="stylesheet" href="https://unpkg.com/trumbowyg@2.30.0/dist/ui/trumbowyg.min.css">
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>Trumbowyg examples</h1>
+
+        <p>
+            Close an editor on clic on "Close" in top right corner. <br>
+            To reopen an editor, double-click on his text.
+        </p>
+    </header>
+
+    <div id="demo-editor">
+        <h2>This editor is the demo Trumbowyg of the Doo's Advanced Image plugin.</h2>
+        <p>
+            Simple image.
+        </p>
+        <img src="https://picsum.photos/200" alt="">
+        <p>
+            Image with link
+        </p>
+        <a href="https://alex-d.github.io/Trumbowyg">
+            <img src="https://picsum.photos/100" alt="">
+        </a>
+    </div>
+</div>
+
+<script src="https://unpkg.com/jquery@4.0.0-beta.2/dist/jquery.min.js"></script>
+<script src="https://unpkg.com/trumbowyg@2.30.0/dist/trumbowyg.min.js"></script>
+<script src="https://unpkg.com/trumbowyg@2.30.0/dist/plugins/upload/trumbowyg.upload.min.js"></script>
+<script src="/src/plugins/doo-advanced-image/doo-advanced-image.js"></script>
+<script>
+    /** Demo editor configuration **/
+    $('#demo-editor').trumbowyg({
+        btnsDef: {
+            imageDropdown: {
+                dropdown: [
+                    'dooAdvancedImage',
+                    'upload'
+                ],
+                ico: 'insertImage'
+            }
+        },
+        btns: [
+            ['viewHTML'],
+            ['imageDropdown'],
+        ]
+    });
+</script>
+</body>
+</html>
