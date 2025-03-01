@@ -1,10 +1,18 @@
-(function ($) {
+;(function ($) {
     'use strict';
 
     // Plugin default options
     const defaultOptions = {};
 
     const BASE_64_URL_PLACEHOLDER = '(Base64)';
+
+    function capitalizeFirstLetter(string) {
+        if (string === undefined || string.length === 0) {
+            return '';
+        }
+
+        return string[0].toUpperCase() + string.slice(1);
+    }
 
     // Factorize insert and edit modals
     function openAdvancedImageModal(trumbowyg, $img) {
@@ -14,9 +22,12 @@
             alt: '',
             width: '',
             height: '',
+            preserveAspectRatio: 'checked',
+            align: 'default',
 
             // Link fields
             href: '',
+            target: trumbowyg.o.linkTargets[0],
         }
 
         // Load all field values from existing image
@@ -30,8 +41,8 @@
             }
 
             fieldValues.alt = $img.attr('alt');
-            fieldValues.width = $img.attr('width');
-            fieldValues.height = $img.attr('height');
+            fieldValues.width = $img.attr('width') ?? parseInt($img[0].style.width ?? '');
+            fieldValues.height = $img.attr('height') ?? parseInt($img[0].style.height ?? '');
 
             // Link attributes
             $imgLink = $img.closest('a', trumbowyg.$ed[0]);
@@ -49,26 +60,41 @@
 
         const options = {
             // Image
-            src: {
+            dooAdvancedImageSrc: {
                 value: fieldValues.src,
                 required: true
             },
-            alt: {
-                label: trumbowyg.lang.description,
+            dooAdvancedImageAlt: {
                 value: fieldValues.alt
             },
-            width: {
+            dooAdvancedImageWidth: {
                 value: fieldValues.width
             },
-            height: {
-                value: fieldValues.width
+            dooAdvancedImageHeight: {
+                value: fieldValues.height
+            },
+            dooAdvancedImagePreserveAspectRatio: {
+                type: 'checkbox',
+                value: fieldValues.preserveAspectRatio
+            },
+            dooAdvancedImageAlign: {
+                value: fieldValues.align,
+                options: [
+                    'default',
+                    'left',
+                    'center',
+                    'right',
+                ].reduce(function (options, optionValue) {
+                    options[optionValue] = trumbowyg.lang['dooAdvancedImageAlign' + capitalizeFirstLetter(optionValue)];
+                    return options;
+                }, {})
             },
 
             // Link
-            href: {
+            dooAdvancedImageHref: {
                 value: fieldValues.href
             },
-            target: {
+            dooAdvancedImageTarget: {
                 value: fieldValues.target,
                 options: targetOptions
             },
@@ -77,37 +103,52 @@
         trumbowyg.openModalInsert(trumbowyg.lang.dooAdvancedImage, options, function (v) { // v are values
             // If $img is undefined, we are inserting a new image
             if ($img === undefined) {
-                trumbowyg.execCmd('insertImage', v.src, false, true);
-                $img = $('img[src="' + v.src + '"]:not([alt])', trumbowyg.$box);
+                trumbowyg.execCmd('insertImage', v.dooAdvancedImageSrc, false, true);
+                $img = $('img[src="' + v.dooAdvancedImageSrc + '"]:not([alt])', trumbowyg.$box);
             }
 
             $img.attr({
-                src: v.src,
-                alt: v.alt,
+                src: v.dooAdvancedImageSrc,
+                alt: v.dooAdvancedImageAlt,
             });
-            if (v.width.trim().length > 0) {
-                $img.attr('width', v.width);
-            }
-            if (v.height.trim().length > 0) {
-                $img.attr('height', v.height);
+            $img.attr('width', v.dooAdvancedImageWidth.trim() || null);
+            $img.attr('height', v.dooAdvancedImageHeight.trim() || null);
+
+            // Remove width & height from style attribute since we use the width and height attributes
+            $img.css('width', '');
+            $img.css('height', '');
+
+            // If $imgLink does not exist, and we have a href, we need to wrap with a link
+            const hasHref = v.dooAdvancedImageHref.trim().length > 0;
+            if ($imgLink.length === 0 && hasHref) {
+                $img.wrap('<a/>');
+                $imgLink = $img.parent();
             }
 
             if ($imgLink.length === 1) {
                 ;(() => {
-                    if (v.href.trim().length === 0) {
+                    if (!hasHref) {
                         $imgLink.after($img);
 
                         if ($imgLink.html().trim().length === 0) {
                             $imgLink.remove();
                         }
 
-                        return
+                        return;
                     }
 
-                    $imgLink.attr({
-                        href: v.href,
-                    });
-                })()
+                    $imgLink.attr('href', v.dooAdvancedImageHref.trim() || null);
+
+                    let linkTarget = v.dooAdvancedImageTarget.trim() ?? '_self';
+                    if (linkTarget === '_self') {
+                        linkTarget = null;
+                    }
+                    $imgLink.attr('target', linkTarget);
+                })();
+            }
+
+            if ($img.attr('style')?.trim().length === 0) {
+                $img.removeAttr('style');
             }
 
             trumbowyg.syncCode();
@@ -117,27 +158,42 @@
         });
     }
 
-    // If the plugin is a button
     function buildButtonDef(trumbowyg) {
+        // noinspection JSUnusedGlobalSymbols
         return {
             fn: function () {
                 trumbowyg.saveRange();
 
-                openAdvancedImageModal(trumbowyg)
+                openAdvancedImageModal(trumbowyg);
             },
             ico: 'insertImage'
-        }
+        };
     }
 
+    // noinspection JSUnusedGlobalSymbols
     $.extend(true, $.trumbowyg, {
         // Add some translations
         langs: {
             en: {
                 dooAdvancedImage: 'Insert Image',
-                alt: 'Alternative Text',
-                height: 'Height',
-                src: 'Image URL',
-                href: 'Link URL',
+
+                // Image
+                dooAdvancedImageSrc: 'Image URL',
+                dooAdvancedImageAlt: 'Alternative Text',
+                dooAdvancedImageWidth: 'Width',
+                dooAdvancedImageHeight: 'Height',
+                dooAdvancedImagePreserveAspectRatio: 'Preserve ratio',
+
+                // Align
+                dooAdvancedImageAlign: 'Align',
+                dooAdvancedImageAlignDefault: 'Default',
+                dooAdvancedImageAlignLeft: 'Left',
+                dooAdvancedImageAlignCenter: 'Center',
+                dooAdvancedImageAlignRight: 'Right',
+
+                // Link
+                dooAdvancedImageHref: 'Link URL',
+                dooAdvancedImageTarget: 'Target',
             }
         },
 
@@ -157,12 +213,12 @@
                         const $img = $(this);
 
                         openAdvancedImageModal(trumbowyg, $img);
-                    }
+                    };
 
-                    // If the plugin is a button
+                    // Register the button definition
                     trumbowyg.addBtnDef('dooAdvancedImage', buildButtonDef(trumbowyg));
                 }
             }
         }
-    })
+    });
 })(jQuery);
