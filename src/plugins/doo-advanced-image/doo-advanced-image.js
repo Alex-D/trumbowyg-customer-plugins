@@ -23,11 +23,13 @@
             width: '',
             height: '',
             preserveAspectRatio: 'checked',
+            horizontalMargin: '',
+            verticalMargin: '',
             align: 'default',
 
             // Link fields
             href: '',
-            target: trumbowyg.o.linkTargets[0],
+            target: trumbowyg.o.linkTargets[0]
         }
 
         // Load all field values from existing image
@@ -41,8 +43,13 @@
             }
 
             fieldValues.alt = $img.attr('alt');
-            fieldValues.width = $img.attr('width') ?? parseInt($img[0].style.width ?? '');
-            fieldValues.height = $img.attr('height') ?? parseInt($img[0].style.height ?? '');
+            fieldValues.width = $img.attr('width') ?? $img[0].style.width?.replace('px', '') ?? '';
+            fieldValues.height = $img.attr('height') ?? $img[0].style.height?.replace('px', '') ?? '';
+            const imgMarginTop = $img[0].style.marginTop
+            const imgMarginLeft = $img[0].style.marginLeft
+            fieldValues.horizontalMargin = imgMarginLeft === 'auto' ? '' : imgMarginLeft?.replace('px', '') ?? '';
+            fieldValues.verticalMargin = imgMarginTop?.replace('px', '') ?? '';
+            fieldValues.align = imgMarginLeft === 'auto' ? 'center' : $img[0].style.float ?? '';
 
             // Link attributes
             $imgLink = $img.closest('a', trumbowyg.$ed[0]);
@@ -77,6 +84,12 @@
                 type: 'checkbox',
                 value: fieldValues.preserveAspectRatio
             },
+            dooAdvancedImageHorizontalMargin: {
+                value: fieldValues.horizontalMargin,
+            },
+            dooAdvancedImageVerticalMargin: {
+                value: fieldValues.verticalMargin,
+            },
             dooAdvancedImageAlign: {
                 value: fieldValues.align,
                 options: [
@@ -91,10 +104,10 @@
             },
 
             // Link
-            dooAdvancedImageHref: {
+            dooAdvancedImageLinkHref: {
                 value: fieldValues.href
             },
-            dooAdvancedImageTarget: {
+            dooAdvancedImageLinkTarget: {
                 value: fieldValues.target,
                 options: targetOptions
             },
@@ -107,24 +120,49 @@
                 $img = $('img[src="' + v.dooAdvancedImageSrc + '"]:not([alt])', trumbowyg.$box);
             }
 
+            // Update image attributes
             $img.attr({
                 src: v.dooAdvancedImageSrc,
                 alt: v.dooAdvancedImageAlt,
             });
             $img.attr('width', v.dooAdvancedImageWidth.trim() || null);
             $img.attr('height', v.dooAdvancedImageHeight.trim() || null);
+            let imgHorizontalMargin = v.dooAdvancedImageHorizontalMargin ? v.dooAdvancedImageHorizontalMargin + 'px' : 0;
+            let imgVerticalMargin = v.dooAdvancedImageVerticalMargin ? v.dooAdvancedImageVerticalMargin + 'px' : 0;
+            let imgFloat = '';
+            let imgDisplay = '';
+            switch (v.dooAdvancedImageAlign) {
+                case 'left':
+                case 'right':
+                    imgFloat = v.dooAdvancedImageAlign;
+                    break;
+                case 'center':
+                    imgDisplay = 'block';
+                    imgHorizontalMargin = 'auto';
+                    break;
+                default:
+            }
+            $img.css('display', imgDisplay);
+            $img.css('float', imgFloat);
+            $img.css(
+                'margin',
+                imgHorizontalMargin || imgVerticalMargin
+                    ? `${imgVerticalMargin} ${imgHorizontalMargin}`
+                    : ''
+            );
 
             // Remove width & height from style attribute since we use the width and height attributes
             $img.css('width', '');
             $img.css('height', '');
 
             // If $imgLink does not exist, and we have a href, we need to wrap with a link
-            const hasHref = v.dooAdvancedImageHref.trim().length > 0;
+            const hasHref = v.dooAdvancedImageLinkHref.trim().length > 0;
             if ($imgLink.length === 0 && hasHref) {
                 $img.wrap('<a/>');
                 $imgLink = $img.parent();
             }
 
+            // Update link attributes
             if ($imgLink.length === 1) {
                 ;(() => {
                     if (!hasHref) {
@@ -137,9 +175,9 @@
                         return;
                     }
 
-                    $imgLink.attr('href', v.dooAdvancedImageHref.trim() || null);
+                    $imgLink.attr('href', v.dooAdvancedImageLinkHref.trim() || null);
 
-                    let linkTarget = v.dooAdvancedImageTarget.trim() ?? '_self';
+                    let linkTarget = v.dooAdvancedImageLinkTarget.trim() ?? '_self';
                     if (linkTarget === '_self') {
                         linkTarget = null;
                     }
@@ -147,6 +185,7 @@
                 })();
             }
 
+            // Remove image style attribute if empty
             if ($img.attr('style')?.trim().length === 0) {
                 $img.removeAttr('style');
             }
@@ -184,7 +223,11 @@
                 dooAdvancedImageHeight: 'Height',
                 dooAdvancedImagePreserveAspectRatio: 'Preserve ratio',
 
-                // Align
+                // Image margins
+                dooAdvancedImageHorizontalMargin: 'Horizontal Margin',
+                dooAdvancedImageVerticalMargin: 'Vertical Margin',
+
+                // Image Align
                 dooAdvancedImageAlign: 'Align',
                 dooAdvancedImageAlignDefault: 'Default',
                 dooAdvancedImageAlignLeft: 'Left',
@@ -192,8 +235,9 @@
                 dooAdvancedImageAlignRight: 'Right',
 
                 // Link
-                dooAdvancedImageHref: 'Link URL',
-                dooAdvancedImageTarget: 'Target',
+                dooAdvancedImageLinkHref: 'Link URL',
+                dooAdvancedImageLinkTitle: 'Link title',
+                dooAdvancedImageLinkTarget: 'Link Target',
             }
         },
 
