@@ -1,0 +1,5 @@
+.trumbowyg-modal form:has(input[name="dooAdvancedImagePreserveAspectRatio"]:checked) input[name="dooAdvancedImageHeight"] {
+    color: transparent;
+    pointer-events: none;
+    background: #ecf0f1;
+}

@@ -55,6 +55,12 @@
             fieldValues.width = $img.attr('width') ?? $img[0].style.width?.replace('px', '') ?? '';
             fieldValues.height = $img.attr('height') ?? $img[0].style.height?.replace('px', '') ?? '';
 
+            // Aspect ratio
+            const naturalAspectRatio = $img[0].naturalWidth / $img[0].naturalHeight;
+            const currentAspectRatio = $img[0].width / $img[0].height;
+            const hasSameAspectRatio = naturalAspectRatio === currentAspectRatio;
+            fieldValues.preserveAspectRatio = hasSameAspectRatio ? 'checked' : '';
+
             // Image Borders
             fieldValues.borderWidth = $img[0].style.borderWidth?.replace('px', '') ?? '';
             fieldValues.borderColor = $img[0].style.borderColor ?? '';
@@ -158,12 +164,18 @@
                 src: v.dooAdvancedImageSrc,
                 alt: v.dooAdvancedImageAlt,
             });
-            $img.attr('width', v.dooAdvancedImageWidth.trim() || null);
-            $img.attr('height', v.dooAdvancedImageHeight.trim() || null);
+            const width = v.dooAdvancedImageWidth.trim() || '';
+            $img.css('width', width ? `${width}px` : '');
+            let height = v.dooAdvancedImageHeight.trim() || '';
+            if (width && v.dooAdvancedImagePreserveAspectRatio) {
+                const aspectRatio = $img[0].naturalWidth / $img[0].naturalHeight;
+                height = parseInt(width) * (1 / aspectRatio);
+            }
+            $img.css('height', height ? `${height}px` : '');
 
-            // Remove width & height from style attribute since we use the width and height attributes
-            $img.css('width', '');
-            $img.css('height', '');
+            // Remove width & height attributes since we use the width and height style
+            $img.removeAttr('width');
+            $img.removeAttr('height');
 
             // Image Borders
             let borderWidth = v.dooAdvancedImageBorderWidth;
