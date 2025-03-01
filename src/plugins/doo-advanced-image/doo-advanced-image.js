@@ -29,6 +29,7 @@
 
             // Link fields
             href: '',
+            title: '',
             target: trumbowyg.o.linkTargets[0]
         }
 
@@ -55,6 +56,7 @@
             $imgLink = $img.closest('a', trumbowyg.$ed[0]);
             if ($imgLink.length === 1) {
                 fieldValues.href = $imgLink.attr('href');
+                fieldValues.title = $imgLink.attr('title');
                 fieldValues.target = $imgLink.attr('target');
             }
         }
@@ -106,6 +108,9 @@
             // Link
             dooAdvancedImageLinkHref: {
                 value: fieldValues.href
+            },
+            dooAdvancedImageLinkTitle: {
+                value: fieldValues.title
             },
             dooAdvancedImageLinkTarget: {
                 value: fieldValues.target,
@@ -176,10 +181,11 @@
                     }
 
                     $imgLink.attr('href', v.dooAdvancedImageLinkHref.trim() || null);
+                    $imgLink.attr('title', v.dooAdvancedImageLinkTitle.trim() || null);
 
-                    let linkTarget = v.dooAdvancedImageLinkTarget.trim() ?? '_self';
+                    let linkTarget = v.dooAdvancedImageLinkTarget.trim();
                     if (linkTarget === '_self') {
-                        linkTarget = null;
+                        linkTarget = null; // Remove the useless target attribute
                     }
                     $imgLink.attr('target', linkTarget);
                 })();
