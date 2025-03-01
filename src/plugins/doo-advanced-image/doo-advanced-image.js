@@ -23,8 +23,16 @@
             width: '',
             height: '',
             preserveAspectRatio: 'checked',
+
+            // Borders
+            borderWidth: '',
+            borderColor: '',
+
+            // Margins
             horizontalMargin: '',
             verticalMargin: '',
+
+            // Align
             align: 'default',
 
             // Link fields
@@ -36,7 +44,7 @@
         // Load all field values from existing image
         let $imgLink
         if ($img !== undefined) {
-            // Image attributes
+            // Image Attributes
             fieldValues.src = $img.attr('src') ?? '';
 
             if (fieldValues.src.indexOf('data:image') === 0) {
@@ -46,13 +54,21 @@
             fieldValues.alt = $img.attr('alt');
             fieldValues.width = $img.attr('width') ?? $img[0].style.width?.replace('px', '') ?? '';
             fieldValues.height = $img.attr('height') ?? $img[0].style.height?.replace('px', '') ?? '';
+
+            // Image Borders
+            fieldValues.borderWidth = $img[0].style.borderWidth?.replace('px', '') ?? '';
+            fieldValues.borderColor = $img[0].style.borderColor ?? '';
+
+            // Image Margins
             const imgMarginTop = $img[0].style.marginTop
             const imgMarginLeft = $img[0].style.marginLeft
             fieldValues.horizontalMargin = imgMarginLeft === 'auto' ? '' : imgMarginLeft?.replace('px', '') ?? '';
             fieldValues.verticalMargin = imgMarginTop?.replace('px', '') ?? '';
+
+            // Image Align
             fieldValues.align = imgMarginLeft === 'auto' ? 'center' : $img[0].style.float ?? '';
 
-            // Link attributes
+            // Link Attributes
             $imgLink = $img.closest('a', trumbowyg.$ed[0]);
             if ($imgLink.length === 1) {
                 fieldValues.href = $imgLink.attr('href');
@@ -86,12 +102,24 @@
                 type: 'checkbox',
                 value: fieldValues.preserveAspectRatio
             },
+
+            // Image Borders
+            dooAdvancedImageBorderWidth: {
+                value: fieldValues.borderWidth,
+            },
+            dooAdvancedImageBorderColor: {
+                value: fieldValues.borderColor,
+            },
+
+            // Image Margins
             dooAdvancedImageHorizontalMargin: {
                 value: fieldValues.horizontalMargin,
             },
             dooAdvancedImageVerticalMargin: {
                 value: fieldValues.verticalMargin,
             },
+
+            // Image Align
             dooAdvancedImageAlign: {
                 value: fieldValues.align,
                 options: [
@@ -132,6 +160,25 @@
             });
             $img.attr('width', v.dooAdvancedImageWidth.trim() || null);
             $img.attr('height', v.dooAdvancedImageHeight.trim() || null);
+
+            // Remove width & height from style attribute since we use the width and height attributes
+            $img.css('width', '');
+            $img.css('height', '');
+
+            // Image Borders
+            let borderWidth = v.dooAdvancedImageBorderWidth;
+            let borderStyle = 'solid';
+            let borderColor = v.dooAdvancedImageBorderColor;
+            let border = '';
+            if (borderWidth && borderColor) {
+                border = `${borderWidth}px ${borderStyle} ${borderColor}`;
+            }
+            $img.css('borderWidth', '');
+            $img.css('borderStyle', '');
+            $img.css('borderColor', '');
+            $img.css('border', border);
+
+            // Image Align & Margins
             let imgHorizontalMargin = v.dooAdvancedImageHorizontalMargin ? v.dooAdvancedImageHorizontalMargin + 'px' : 0;
             let imgVerticalMargin = v.dooAdvancedImageVerticalMargin ? v.dooAdvancedImageVerticalMargin + 'px' : 0;
             let imgFloat = '';
@@ -155,10 +202,6 @@
                     ? `${imgVerticalMargin} ${imgHorizontalMargin}`
                     : ''
             );
-
-            // Remove width & height from style attribute since we use the width and height attributes
-            $img.css('width', '');
-            $img.css('height', '');
 
             // If $imgLink does not exist, and we have a href, we need to wrap with a link
             const hasHref = v.dooAdvancedImageLinkHref.trim().length > 0;
@@ -229,7 +272,11 @@
                 dooAdvancedImageHeight: 'Height',
                 dooAdvancedImagePreserveAspectRatio: 'Preserve ratio',
 
-                // Image margins
+                // Image Borders
+                dooAdvancedImageBorderWidth: 'Border Width',
+                dooAdvancedImageBorderColor: 'Border Color',
+
+                // Image Margins
                 dooAdvancedImageHorizontalMargin: 'Horizontal Margin',
                 dooAdvancedImageVerticalMargin: 'Vertical Margin',
 
