@@ -8,7 +8,7 @@
     "lint:editorconfig": "editorconfig-checker"
   },
   "dependencies": {
-    "trumbowyg": "^2.30.0"
+    "trumbowyg": "^2.31.0"
   },
   "devDependencies": {
     "editorconfig-checker": "^6.0.1",
