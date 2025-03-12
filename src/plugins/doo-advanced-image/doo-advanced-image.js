@@ -217,13 +217,13 @@
 
             // If $imgLink does not exist, and we have a href, we need to wrap with a link
             const hasHref = v.dooAdvancedImageLinkHref.trim().length > 0;
-            if ($imgLink.length === 0 && hasHref) {
+            if ($imgLink?.length === 0 && hasHref) {
                 $img.wrap('<a/>');
                 $imgLink = $img.parent();
             }
 
             // Update link attributes
-            if ($imgLink.length === 1) {
+            if ($imgLink?.length === 1) {
                 ;(() => {
                     if (!hasHref) {
                         $imgLink.after($img);
